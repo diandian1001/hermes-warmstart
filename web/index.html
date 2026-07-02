@@ -148,6 +148,7 @@
 // 数据
 // ============================================================
 const LIFE_Q = [
+  {badge:"出生信息", q:"先告诉我你的出生时间（用于生成命盘快照）", type:"birth", hint:"选填，不填则跳过命盘直接进入性格评估。完整紫微排盘需在 Python 版中运行。"},
   {badge:"命宫", q:"你的核心性格更接近哪种？", opts:[
     {t:"领导型：有主见、爱主导、目标感强", v:"领导型（紫微/天府类）"},
     {t:"柔和型：善配合、亲和力好、不急躁、人际敏感", v:"柔和型（天同/太阴类）"},
@@ -238,10 +239,10 @@ const SECTIONS = [
 // ============================================================
 // 状态
 // ============================================================
-let sec = 0;          // 当前板块 0/1/2
-let qi = 0;           // 板块内题号
-let answers = [[], [], []]; // [life[], pers[], ag[]] — pers[*] is {s:float}, others are {v:str}
+let sec = 0; let qi = 0;
+let answers = [[], [], []];
 let agCustom = "";
+let birthInfo = { year:"", month:"", day:"", hour:"", gender:"" };
 
 // ============================================================
 // 渲染
@@ -252,6 +253,7 @@ function render() {
   const s = SECTIONS[sec];
   const q = s.q[qi];
   const isFill = q.type === "fill";
+  const isBirth = q.type === "birth";
   const cls = s.color;
 
   // Progress bar
@@ -262,25 +264,39 @@ function render() {
   });
 
   const total = s.q.length;
-  const counter = isFill ? `第 ${qi+1}/${total} 题` : `第 ${qi+1}/${total} 题（点击选项自动跳转下一题）`;
+  const counter = isFill ? `第 ${qi+1}/${total} 题` : (isBirth ? "第 1/4 题（选填，可直接跳过）" : `第 ${qi+1}/${total} 题（点击选项自动跳转下一题）`);
 
-  const optsHTML = isFill ? "" : q.opts.map((o, i) => {
-    const picked = answers[sec][qi] !== undefined && answers[sec][qi] !== null &&
-      (s.key==="pers" ? answers[sec][qi].s === o.s : answers[sec][qi].v === o.v);
-    return `<div class="opt${picked?' picked '+cls:''}" onclick="pick(${i})">${o.t}</div>`;
-  }).join("");
+  let optsHTML = "", fillHTML = "", birthHTML = "";
 
-  const fillHTML = isFill ? `<textarea class="fill-input" id="fillInput" placeholder="${q.placeholder||''}" oninput="agCustom=this.value">${agCustom||''}</textarea>` : "";
+  if (isBirth) {
+    const HOURS = ["未知","子时 23-1","丑时 1-3","寅时 3-5","卯时 5-7","辰时 7-9","巳时 9-11","午时 11-13","未时 13-15","申时 15-17","酉时 17-19","戌时 19-21","亥时 21-23"];
+    birthHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生年份</label><input type="number" id="bYear" placeholder="如 1999" value="${birthInfo.year||''}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birthInfo.year=this.value"></div>
+      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生月份</label><select id="bMonth" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.month=this.value"><option value="">选择</option>${Array.from({length:12},(_,i)=>`<option value="${i+1}"${birthInfo.month==i+1?' selected':''}>${i+1}月</option>`).join('')}</select></div>
+      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生日</label><input type="number" id="bDay" placeholder="1-31" min="1" max="31" value="${birthInfo.day||''}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birthInfo.day=this.value"></div>
+      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生时辰</label><select id="bHour" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.hour=this.value">${HOURS.map((h,i)=>`<option value="${i}"${birthInfo.hour==i?' selected':''}>${h}</option>`).join('')}</select></div>
+    </div>
+    <div style="margin-bottom:6px"><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">性别（选填）</label><select id="bGender" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.gender=this.value"><option value="">不填</option><option value="男"${birthInfo.gender==='男'?' selected':''}>男</option><option value="女"${birthInfo.gender==='女'?' selected':''}>女</option></select></div>
+    <div style="color:var(--sub);font-size:0.75rem;margin-top:12px;padding:8px 12px;background:var(--bg);border-radius:8px">📌 ${q.hint||''}</div>`;
+  } else if (isFill) {
+    fillHTML = `<textarea class="fill-input" id="fillInput" placeholder="${q.placeholder||''}" oninput="agCustom=this.value">${agCustom||''}</textarea>`;
+  } else {
+    optsHTML = q.opts.map((o, i) => {
+      const picked = answers[sec][qi] !== undefined && answers[sec][qi] !== null &&
+        (s.key==="pers" ? answers[sec][qi].s === o.s : answers[sec][qi].v === o.v);
+      return `<div class="opt${picked?' picked '+cls:''}" onclick="pick(${i})">${o.t}</div>`;
+    }).join("");
+  }
 
   const backBtn = (qi > 0)
     ? `<button class="btn btn-back" onclick="prev()">← 上一题</button>`
     : (sec > 0 ? `<button class="btn btn-back" onclick="prevSection()">← ${SECTIONS[sec-1].name}</button>` : `<span></span>`);
 
-  const nextBtn = isFill
+  const nextBtn = (isFill || isBirth)
     ? `<button class="btn btn-next ${cls}" onclick="next()">${qi===total-1?'生成画像 ✨':'下一题 →'}</button>`
     : "";
 
-  const skipBtn = !isFill && qi < total - 1
+  const skipBtn = !isFill && !isBirth && qi < total - 1
     ? `<span class="btn-skip" onclick="skip()">跳过此题</span>`
     : "";
 
@@ -290,6 +306,7 @@ function render() {
     <div class="q-title">${q.q}</div>
     ${optsHTML}
     ${fillHTML}
+    ${birthHTML}
     <div class="nav">
       ${backBtn}
       ${skipBtn}
@@ -339,9 +356,10 @@ function skip() { next(); }
 function buildFinalPrompt() {
   const L = LIFE_Q, P = PERSONALITY_Q, A = AGENT_Q;
   const la = answers[0], pa = answers[1], aa = answers[2];
+  // gv handles the birth form shift: life q index 0=birth, 1=命宫, 2=身宫, 3=迁移宫
   const gv = (arr, i) => (arr[i] && arr[i].v) || "未填写";
 
-  let ming = gv(la, 0), shen = gv(la, 1), migr = gv(la, 2);
+  let ming = gv(la, 1), shen = gv(la, 2), migr = gv(la, 3);
 
   let scores = {};
   P.forEach((_, i) => { scores[_.badge] = (pa[i] && pa[i].s !== undefined) ? pa[i].s : 0.5; });
@@ -364,9 +382,17 @@ function buildFinalPrompt() {
   let useInst = {"工作助手":"你是一个工作助手，专注于文档撰写、数据分析、项目管理等任务。","个人教练":"你是一个个人教练，帮助用户进行学习规划、习惯养成和情绪支持。","日常陪伴":"你是一个日常对话伙伴，提供陪伴、闲聊和生活疑惑解答。","专业工具":"你是一个专业工具型 agent，专注于编程、设计、研究等技能领域的深度协助。"}[use] || "你是一个 AI 助手。";
   let customBlock = agCustom ? `\n### 用户特别要求\n${agCustom}\n` : "";
 
+  // 出生信息
+  const HOUR_NAMES = ["未知","子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时"];
+  const hasBirth = birthInfo.year;
+  let birthLine = hasBirth
+    ? `${birthInfo.year}年${birthInfo.month}月${birthInfo.day}日 ${HOUR_NAMES[birthInfo.hour]||'未知'}${birthInfo.gender?' · '+birthInfo.gender:''}`
+    : "未填写（完整紫微排盘需在 Python 版中运行）";
+
   return `# ${useInst}
 
 ## 用户背景
+- 出生信息：${birthLine}
 - 性格基调：${ming}
 - 当前焦点：${shen}
 - 对外风格：${migr}
@@ -402,6 +428,7 @@ async function copyPrompt() {
 
 function resetAll() {
   sec=0; qi=0; answers=[[],[],[]]; agCustom="";
+  birthInfo = { year:"", month:"", day:"", hour:"", gender:"" };
   document.getElementById("result").classList.remove("visible");
   document.querySelectorAll(".section-step").forEach(el => { el.className="section-step"; });
   render();
