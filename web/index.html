@@ -10,66 +10,35 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.6; min-height:100vh; display:flex; justify-content:center; }
   .container { max-width:640px; width:100%; padding:30px 20px; }
-
-  /* Header */
   .header { text-align:center; margin-bottom:16px; }
   .header h1 { font-size:1.6rem; font-weight:700; }
   .header p { color:var(--sub); font-size:0.9rem; margin-top:4px; }
-
-  /* Section indicator */
   .section-bar { display:flex; gap:6px; margin-bottom:24px; }
-  .section-step {
-    flex:1; height:4px; background:var(--border); border-radius:4px;
-    transition:background 0.3s;
-  }
+  .section-step { flex:1; height:4px; background:var(--border); border-radius:4px; transition:background 0.3s; }
   .section-step.done { background:var(--a1); }
   .section-step.done.s2 { background:var(--a2); }
   .section-step.done.s3 { background:var(--a3); }
-
-  /* Card */
-  .card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:var(--radius); padding:36px 28px;
-    animation:fadeIn 0.35s ease;
-  }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:36px 28px; animation:fadeIn 0.35s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
   .badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; margin-bottom:16px; }
   .badge.s1 { background:rgba(124,92,252,0.12); color:var(--a1); }
   .badge.s2 { background:rgba(245,158,11,0.12); color:var(--a2); }
   .badge.s3 { background:rgba(16,185,129,0.12); color:var(--a3); }
-
   .q-counter { color:var(--sub); font-size:0.8rem; margin-bottom:20px; }
   .q-title { font-size:1.15rem; font-weight:600; margin-bottom:24px; line-height:1.5; }
-
   .options { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
-  .opt {
-    background:var(--bg); border:1.5px solid var(--border); border-radius:10px;
-    padding:15px 18px; cursor:pointer; transition:all 0.2s; font-size:0.93rem;
-    line-height:1.5;
-  }
+  .opt { background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:15px 18px; cursor:pointer; transition:all 0.2s; font-size:0.93rem; line-height:1.5; }
   .opt:hover { border-color:var(--a1); }
   .opt.picked { border-color:var(--a1); background:rgba(124,92,252,0.06); }
   .opt.picked.s2 { border-color:var(--a2); background:rgba(245,158,11,0.06); }
   .opt.picked.s3 { border-color:var(--a3); background:rgba(16,185,129,0.06); }
-  .opt.picked::after { content:" ✓"; float:right; font-weight:700; }
-  .opt.picked::after { color:var(--a1); }
+  .opt.picked::after { content:" ✓"; float:right; font-weight:700; color:var(--a1); }
   .opt.picked.s2::after { color:var(--a2); }
   .opt.picked.s3::after { color:var(--a3); }
-
-  .fill-input {
-    width:100%; background:var(--bg); border:1.5px solid var(--border);
-    border-radius:10px; padding:16px; color:var(--text); font-size:0.93rem;
-    font-family:inherit; resize:vertical; min-height:100px;
-    transition:border-color 0.2s; margin-bottom:28px;
-  }
+  .fill-input { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:16px; color:var(--text); font-size:0.93rem; font-family:inherit; resize:vertical; min-height:100px; transition:border-color 0.2s; margin-bottom:28px; }
   .fill-input:focus { outline:none; border-color:var(--a3); }
-
   .nav { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-  .btn {
-    padding:11px 28px; border-radius:10px; border:none; font-size:0.9rem;
-    font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap;
-  }
+  .btn { padding:11px 28px; border-radius:10px; border:none; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
   .btn-next { background:var(--a1); color:#fff; }
   .btn-next:hover { opacity:0.9; }
   .btn-next.s2 { background:var(--a2); }
@@ -78,55 +47,32 @@
   .btn-back:hover { border-color:var(--a1); color:var(--text); }
   .btn-skip { background:transparent; color:var(--sub); font-size:0.82rem; cursor:pointer; }
   .btn-skip:hover { color:var(--text); }
-
-  /* Result */
   .result { display:none; animation:fadeIn 0.5s ease; }
   .result.visible { display:block; }
   .result h2 { text-align:center; margin-bottom:16px; font-size:1.25rem; }
-
-  .prompt-box {
-    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-    padding:24px; font-family:'SF Mono','Fira Code',monospace; font-size:0.83rem;
-    line-height:1.8; white-space:pre-wrap; word-break:break-word;
-    max-height:500px; overflow-y:auto; margin-bottom:20px;
-  }
+  .prompt-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; font-family:'SF Mono','Fira Code',monospace; font-size:0.83rem; line-height:1.8; white-space:pre-wrap; word-break:break-word; max-height:500px; overflow-y:auto; margin-bottom:20px; }
   .actions { display:flex; gap:12px; }
   .btn-copy { background:var(--a3); color:#fff; }
   .btn-reset { background:var(--card); color:var(--text); border:1px solid var(--border); }
-
-  .toast {
-    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
-    background:var(--a1); color:#fff; padding:12px 28px; border-radius:10px;
-    font-weight:600; font-size:0.9rem; opacity:0; transition:opacity 0.3s;
-    pointer-events:none; z-index:100;
-  }
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:var(--a1); color:#fff; padding:12px 28px; border-radius:10px; font-weight:600; font-size:0.9rem; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:100; }
   .toast.show { opacity:1; }
-
   .footer { text-align:center; margin-top:36px; color:var(--sub); font-size:0.78rem; }
   .footer a { color:var(--a1); text-decoration:none; }
-
   @media (max-width:500px) { .container { padding:20px 12px; } .card { padding:24px 18px; } }
 </style>
 </head>
 <body>
-
 <div class="container">
   <div class="header">
     <h1>🧭 Warmstart</h1>
     <p>三重画像 · 一次构建 · 任何 AI 第一次对话就认识你</p>
   </div>
-
-  <!-- Section progress -->
   <div class="section-bar" id="sectionBar">
     <div class="section-step"></div>
     <div class="section-step"></div>
     <div class="section-step"></div>
   </div>
-
-  <!-- Card -->
   <div class="card" id="card"></div>
-
-  <!-- Result -->
   <div class="result" id="result">
     <h2>✅ 你的专属 AI 画像</h2>
     <p style="text-align:center;color:var(--sub);margin-bottom:16px;">三重视角已融合，复制到任何 AI 的 system prompt 中</p>
@@ -136,19 +82,14 @@
       <button class="btn btn-reset" onclick="resetAll()">🔄 重新开始</button>
     </div>
   </div>
-
   <div class="footer">
-    <a href="https://github.com/diandian1001/warmstart" target="_blank">GitHub</a> · MIT · v0.3.1
+    <a href="https://github.com/diandian1001/warmstart" target="_blank">GitHub</a> · MIT · v0.3.3
   </div>
   <div class="toast" id="toast"></div>
 </div>
 
 <script>
-// ============================================================
-// 数据
-// ============================================================
 const LIFE_Q = [
-  {badge:"出生信息", q:"先告诉我你的出生时间（用于生成命盘快照）", type:"birth", hint:"选填，不填则跳过命盘直接进入性格评估。完整紫微排盘需在 Python 版中运行。"},
   {badge:"命宫", q:"你的核心性格更接近哪种？", opts:[
     {t:"领导型：有主见、爱主导、目标感强", v:"领导型（紫微/天府类）"},
     {t:"柔和型：善配合、亲和力好、不急躁、人际敏感", v:"柔和型（天同/太阴类）"},
@@ -215,16 +156,19 @@ const AGENT_Q = [
   {badge:"特别要求", q:"还有什么想对 agent 说的？", type:"fill", placeholder:"例如：避免英文缩写、优先中国本土案例、涉及心理话题时不下诊断……"},
 ];
 
+// 修复1+2：标签修正
 const LABELS = {
-  conscientiousness:{high:"做事有计划，喜欢结构和步骤。",low:"做事灵活，边做边调整，不喜欢被固定流程束缚。",mid:"做事有一定计划性，但也接受灵活调整。"},
+  conscientiousness:{high:"做事有计划，习惯先规划再执行。",low:"做事灵活，边做边调整，不喜欢被固定流程束缚。",mid:"做事有一定计划性，但也接受灵活调整。"},
   extraversion:{high:"沟通中注重关系建立，喜欢先建立融洽感再谈正事。",low:"沟通风格直接，喜欢简洁、直奔主题。",mid:"沟通风格会根据对象调整，熟人直接，陌生人多铺垫。"},
   openness:{high:"对新事物和新方法接受度高，愿意尝试有风险的方案。",low:"偏好成熟、经过验证的方法，对风险保持谨慎。",mid:"对创新持开放态度，但会根据具体情况判断是否采用。"},
-  neuroticism:{high:"对挫折比较敏感，需要得到肯定和方向确认。",low:"情绪稳定，面对挫折时更关注如何解决问题本身。",mid:"会有短暂的情绪波动，但通常能较快恢复理性。"},
+  neuroticism:{high:"对挫折比较敏感，需要得到肯定和方向确认。",low:"情绪稳定，面对挫折时更关注如何解决问题本身。",mid:"情绪状态可能有波动，不要假设用户已经ready解决问题。"},
   agreeableness:{high:"习惯综合多方意见后再做决定，重视他人的看法。",low:"决策时更依赖自己的判断，较少参考他人意见。",mid:"有自己的判断，也会参考信任之人的意见。"},
 };
+
+// 修复3：区分三种"简洁"
 const INSTRUCTIONS = {
   conscientiousness:{high:"输出时先给框架和步骤，再给具体内容",mid:"输出时先给结论，再给框架，最后给内容",low:"输出时先给结论，再给推导过程"},
-  extraversion:{high:"适当加入回应性语言，在对话中建立连接感",mid:"根据话题节奏自然切换简洁和关系型沟通",low:"保持简洁，减少寒暄和客套话"},
+  extraversion:{high:"适当加入回应性语言，在对话中建立连接感",mid:"根据话题节奏自然切换简洁和关系型沟通",low:"正式简洁——用最少的话传递最完整的信息，适合向上汇报场景"},
   openness:{high:"多提供新思路和替代方案，不局限于最常规的答案",mid:"给出成熟方案但标注可选的新方向",low:"优先给出已验证的成熟方案，减少不确定的选项"},
   neuroticism:{high:"反馈时先肯定再给建议，避免直接否定用户的判断",mid:"必要时先共情再分析，不需要过多情绪铺垫",low:"直接给出分析和建议，不需要过多情绪缓冲"},
   agreeableness:{high:"适时征求用户意见，保持双向沟通节奏",mid:"给出判断后留一个征求意见的窗口",low:"尊重用户的独立判断，不要频繁追问'你觉得呢'"},
@@ -236,91 +180,54 @@ const SECTIONS = [
   {name:"Agent 定制", q:AGENT_Q, color:"s3", nid:"ag_", key:"ag"},
 ];
 
-// ============================================================
-// 状态
-// ============================================================
 let sec = 0; let qi = 0;
 let answers = [[], [], []];
 let agCustom = "";
-let birthInfo = { year:"", month:"", day:"", hour:"", gender:"" };
 
-// ============================================================
-// 渲染
-// ============================================================
 function render() {
   if (sec >= 3) { showResult(); return; }
-
   const s = SECTIONS[sec];
   const q = s.q[qi];
   const isFill = q.type === "fill";
-  const isBirth = q.type === "birth";
   const cls = s.color;
-
-  // Progress bar
   document.querySelectorAll(".section-step").forEach((el, i) => {
     el.className = "section-step";
     if (i < sec) el.classList.add("done", SECTIONS[i].color);
     if (i === sec && qi === s.q.length - 1) el.classList.add("done", s.color);
   });
-
   const total = s.q.length;
-  const counter = isFill ? `第 ${qi+1}/${total} 题` : (isBirth ? "第 1/4 题（选填，可直接跳过）" : `第 ${qi+1}/${total} 题（点击选项自动跳转下一题）`);
-
-  let optsHTML = "", fillHTML = "", birthHTML = "";
-
-  if (isBirth) {
-    const HOURS = ["未知","子时 23-1","丑时 1-3","寅时 3-5","卯时 5-7","辰时 7-9","巳时 9-11","午时 11-13","未时 13-15","申时 15-17","酉时 17-19","戌时 19-21","亥时 21-23"];
-    birthHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
-      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生年份</label><input type="number" id="bYear" placeholder="如 1999" value="${birthInfo.year||''}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birthInfo.year=this.value"></div>
-      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生月份</label><select id="bMonth" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.month=this.value"><option value="">选择</option>${Array.from({length:12},(_,i)=>`<option value="${i+1}"${birthInfo.month==i+1?' selected':''}>${i+1}月</option>`).join('')}</select></div>
-      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生日</label><input type="number" id="bDay" placeholder="1-31" min="1" max="31" value="${birthInfo.day||''}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birthInfo.day=this.value"></div>
-      <div><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">出生时辰</label><select id="bHour" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.hour=this.value">${HOURS.map((h,i)=>`<option value="${i}"${birthInfo.hour==i?' selected':''}>${h}</option>`).join('')}</select></div>
-    </div>
-    <div style="margin-bottom:6px"><label style="color:var(--sub);font-size:0.78rem;display:block;margin-bottom:4px">性别（选填）</label><select id="bGender" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birthInfo.gender=this.value"><option value="">不填</option><option value="男"${birthInfo.gender==='男'?' selected':''}>男</option><option value="女"${birthInfo.gender==='女'?' selected':''}>女</option></select></div>
-    <div style="color:var(--sub);font-size:0.75rem;margin-top:12px;padding:8px 12px;background:var(--bg);border-radius:8px">📌 ${q.hint||''}</div>`;
-  } else if (isFill) {
-    fillHTML = `<textarea class="fill-input" id="fillInput" placeholder="${q.placeholder||''}" oninput="agCustom=this.value">${agCustom||''}</textarea>`;
-  } else {
-    optsHTML = q.opts.map((o, i) => {
-      const picked = answers[sec][qi] !== undefined && answers[sec][qi] !== null &&
-        (s.key==="pers" ? answers[sec][qi].s === o.s : answers[sec][qi].v === o.v);
-      return `<div class="opt${picked?' picked '+cls:''}" onclick="pick(${i})">${o.t}</div>`;
-    }).join("");
-  }
-
+  const counter = isFill ? `第 ${qi+1}/${total} 题` : `第 ${qi+1}/${total} 题（点击选项自动跳转下一题）`;
+  const optsHTML = isFill ? "" : q.opts.map((o, i) => {
+    const picked = answers[sec][qi] !== undefined && answers[sec][qi] !== null &&
+      (s.key==="pers" ? answers[sec][qi].s === o.s : answers[sec][qi].v === o.v);
+    return `<div class="opt${picked?' picked '+cls:''}" onclick="pick(${i})">${o.t}</div>`;
+  }).join("");
+  const fillHTML = isFill ? `<textarea class="fill-input" id="fillInput" placeholder="${q.placeholder||''}" oninput="agCustom=this.value">${agCustom||''}</textarea>` : "";
   const backBtn = (qi > 0)
     ? `<button class="btn btn-back" onclick="prev()">← 上一题</button>`
     : (sec > 0 ? `<button class="btn btn-back" onclick="prevSection()">← ${SECTIONS[sec-1].name}</button>` : `<span></span>`);
-
-  const nextBtn = (isFill || isBirth)
+  const nextBtn = isFill
     ? `<button class="btn btn-next ${cls}" onclick="next()">${qi===total-1?'生成画像 ✨':'下一题 →'}</button>`
     : "";
-
-  const skipBtn = !isFill && !isBirth && qi < total - 1
+  const skipBtn = !isFill && qi < total - 1
     ? `<span class="btn-skip" onclick="skip()">跳过此题</span>`
     : "";
-
   document.getElementById("card").innerHTML = `
     <div class="badge ${cls}">${s.name} · ${q.badge}</div>
     <div class="q-counter">${counter}</div>
     <div class="q-title">${q.q}</div>
     ${optsHTML}
     ${fillHTML}
-    ${birthHTML}
     <div class="nav">
       ${backBtn}
       ${skipBtn}
       ${nextBtn}
     </div>
   `;
-
   if (isFill) document.getElementById("fillInput")?.focus();
   document.getElementById("result").classList.remove("visible");
 }
 
-// ============================================================
-// 交互
-// ============================================================
 function pick(idx) {
   const s = SECTIONS[sec];
   const q = s.q[qi];
@@ -350,16 +257,13 @@ function prevSection() {
 
 function skip() { next(); }
 
-// ============================================================
-// 生成
-// ============================================================
+// 修复4+5+6：出生信息标注 + 画像D完整结构
 function buildFinalPrompt() {
   const L = LIFE_Q, P = PERSONALITY_Q, A = AGENT_Q;
   const la = answers[0], pa = answers[1], aa = answers[2];
-  // gv handles the birth form shift: life q index 0=birth, 1=命宫, 2=身宫, 3=迁移宫
   const gv = (arr, i) => (arr[i] && arr[i].v) || "未填写";
 
-  let ming = gv(la, 1), shen = gv(la, 2), migr = gv(la, 3);
+  let ming = gv(la, 0), shen = gv(la, 1), migr = gv(la, 2);
 
   let scores = {};
   P.forEach((_, i) => { scores[_.badge] = (pa[i] && pa[i].s !== undefined) ? pa[i].s : 0.5; });
@@ -382,17 +286,13 @@ function buildFinalPrompt() {
   let useInst = {"工作助手":"你是一个工作助手，专注于文档撰写、数据分析、项目管理等任务。","个人教练":"你是一个个人教练，帮助用户进行学习规划、习惯养成和情绪支持。","日常陪伴":"你是一个日常对话伙伴，提供陪伴、闲聊和生活疑惑解答。","专业工具":"你是一个专业工具型 agent，专注于编程、设计、研究等技能领域的深度协助。"}[use] || "你是一个 AI 助手。";
   let customBlock = agCustom ? `\n### 用户特别要求\n${agCustom}\n` : "";
 
-  // 出生信息
-  const HOUR_NAMES = ["未知","子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时"];
-  const hasBirth = birthInfo.year;
-  let birthLine = hasBirth
-    ? `${birthInfo.year}年${birthInfo.month}月${birthInfo.day}日 ${HOUR_NAMES[birthInfo.hour]||'未知'}${birthInfo.gender?' · '+birthInfo.gender:''}`
-    : "未填写（完整紫微排盘需在 Python 版中运行）";
+  // 修复4：出生信息标注（暂不收集，预留接口）
+  let birthNote = "- 出生信息：未收集（命盘时间轴功能开发中，暂不影响画像质量）";
 
   return `# ${useInst}
 
 ## 用户背景
-- 出生信息：${birthLine}
+${birthNote}
 - 性格基调：${ming}
 - 当前焦点：${shen}
 - 对外风格：${migr}
@@ -407,7 +307,7 @@ ${inst.join("\n")}
 - ${toneInst}
 - ${lenInst}${customBlock}
 ---
-> 本画像由 Warmstart v0.3.1 生成，可复制到任何 AI 的 system prompt 中直接使用。
+> 本画像由 Warmstart v0.3.3 生成，可复制到任何 AI 的 system prompt 中直接使用。
 `;
 }
 
@@ -428,13 +328,11 @@ async function copyPrompt() {
 
 function resetAll() {
   sec=0; qi=0; answers=[[],[],[]]; agCustom="";
-  birthInfo = { year:"", month:"", day:"", hour:"", gender:"" };
   document.getElementById("result").classList.remove("visible");
   document.querySelectorAll(".section-step").forEach(el => { el.className="section-step"; });
   render();
 }
 function showToast(msg) { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2500); }
-
 render();
 </script>
 </body>
