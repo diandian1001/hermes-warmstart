@@ -6,13 +6,8 @@ Hermes Warmstart — 量表定义模块
   - 预留：MBTI、DISC、紫微斗数等
 """
 
-from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
-
-# ============================================================
-# 量表协议
-# ============================================================
 
 @runtime_checkable
 class Scale(Protocol):
@@ -24,7 +19,7 @@ class Scale(Protocol):
         ...
 
     def parse_answers(self, answers: list[int]) -> dict:
-        """将答案索引列表转为维度名→分数映射"""
+        """将答案索引列表转为维度名→分数映射。实现应做输入校验。"""
         ...
 
 
@@ -34,8 +29,7 @@ class Scale(Protocol):
 
 BIG_FIVE_QUESTIONS = [
     {
-        "id": "conscientiousness",
-        "name": "做事风格",
+        "id": "conscientiousness", "name": "做事风格",
         "question": "面对一个新任务，你通常怎么做？",
         "options": [
             {"text": "先列计划、分步骤，确保每个环节都有数", "score": 1.0, "label": "计划型"},
@@ -44,8 +38,7 @@ BIG_FIVE_QUESTIONS = [
         ],
     },
     {
-        "id": "extraversion",
-        "name": "沟通偏好",
+        "id": "extraversion", "name": "沟通偏好",
         "question": "和别人沟通时，你更倾向于？",
         "options": [
             {"text": "直来直去，说重点就行", "score": 0.2, "label": "直接型"},
@@ -54,8 +47,7 @@ BIG_FIVE_QUESTIONS = [
         ],
     },
     {
-        "id": "openness",
-        "name": "思维方式",
+        "id": "openness", "name": "思维方式",
         "question": "遇到一个难题，你倾向于？",
         "options": [
             {"text": "尝试全新的方法，哪怕冒险", "score": 1.0, "label": "创新型"},
@@ -64,8 +56,7 @@ BIG_FIVE_QUESTIONS = [
         ],
     },
     {
-        "id": "neuroticism",
-        "name": "情绪反应",
+        "id": "neuroticism", "name": "情绪反应",
         "question": "当事情进展不顺时，你通常？",
         "options": [
             {"text": "容易焦虑，需要有人肯定方向是对的", "score": 1.0, "label": "敏感型"},
@@ -74,8 +65,7 @@ BIG_FIVE_QUESTIONS = [
         ],
     },
     {
-        "id": "agreeableness",
-        "name": "决策方式",
+        "id": "agreeableness", "name": "决策方式",
         "question": "做重要决定时，你更依赖？",
         "options": [
             {"text": "自己的判断和分析", "score": 0.2, "label": "独立型"},
@@ -86,7 +76,7 @@ BIG_FIVE_QUESTIONS = [
 ]
 
 
-class BigFiveScale:
+class BigFiveScale(Scale):
     """大五人格快量表"""
 
     @property
@@ -94,15 +84,29 @@ class BigFiveScale:
         return BIG_FIVE_QUESTIONS
 
     def parse_answers(self, answers: list[int]) -> dict:
+        if not isinstance(answers, list):
+            raise TypeError(f"answers must be a list, got {type(answers).__name__}")
+        if len(answers) != len(BIG_FIVE_QUESTIONS):
+            raise ValueError(
+                f"expected {len(BIG_FIVE_QUESTIONS)} answers, got {len(answers)}"
+            )
+        for i, idx in enumerate(answers):
+            if not isinstance(idx, int):
+                raise TypeError(f"answer[{i}] must be int, got {type(idx).__name__}")
+            if not (0 <= idx <= 2):
+                raise ValueError(
+                    f"answer[{i}] must be 0/1/2, got {idx} "
+                    f"(question: {BIG_FIVE_QUESTIONS[i]['name']})"
+                )
+
         scores = {}
         for i, q in enumerate(BIG_FIVE_QUESTIONS):
-            idx = answers[i]
-            scores[q["id"]] = q["options"][idx]["score"]
+            scores[q["id"]] = q["options"][answers[i]]["score"]
         return scores
 
 
 # ============================================================
-# 维度标签（用于生成自然语言描述）
+# 维度标签
 # ============================================================
 
 DIMENSION_LABELS = {
@@ -136,22 +140,27 @@ DIMENSION_LABELS = {
 DIMENSION_INSTRUCTIONS = {
     "conscientiousness": {
         "high": "输出时先给框架和步骤，再给具体内容",
+        "mid": "输出时先给结论，再给框架，最后给内容",
         "low": "输出时先给结论，再给推导过程",
     },
     "extraversion": {
         "high": "适当加入回应性语言，在对话中建立连接感",
+        "mid": "根据话题节奏自然切换简洁和关系型沟通",
         "low": "保持简洁，减少寒暄和客套话",
     },
     "openness": {
         "high": "多提供新思路和替代方案，不局限于最常规的答案",
+        "mid": "给出成熟方案但标注可选的新方向",
         "low": "优先给出已验证的成熟方案，减少不确定的选项",
     },
     "neuroticism": {
         "high": "反馈时先肯定再给建议，避免直接否定用户的判断",
+        "mid": "必要时先共情再分析，不需要过多情绪铺垫",
         "low": "直接给出分析和建议，不需要过多情绪缓冲",
     },
     "agreeableness": {
         "high": "适时征求用户意见，保持双向沟通节奏",
+        "mid": "给出判断后留一个征求意见的窗口",
         "low": "尊重用户的独立判断，不要频繁追问'你觉得呢'",
     },
 }

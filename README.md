@@ -90,7 +90,7 @@ python -m warmstart.prompt
           ▼
 ┌─────────────────────┐
 │  warmstart/prompt    │  ← System Prompt 生成
-│  to_system_prompt()  │
+│  to_system_prompt_block()  │
 └─────────┬───────────┘
           ▼
 ┌─────────────────────────────────────┐
@@ -117,8 +117,7 @@ hermes-warmstart/
 ├── tests/
 │   └── test_profile.py  # 25 项测试（含 243 种答案穷举）
 ├── examples/
-│   ├── walkthrough.md   # 完整使用教学
-│   └── demo.py          # 演示脚本
+│   └── walkthrough.md   # 完整使用教学
 ├── templates/
 │   └── system_prompt_template.txt
 ├── SKILL.md             # Hermes 一键集成 skill
