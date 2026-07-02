@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warmstart — AI Agent 冷启动画像</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e1e4eb;
+    --sub: #8b8fa3;
+    --accent: #7c5cfc;
+    --accent-glow: rgba(124,92,252,0.15);
+    --green: #34d399;
+    --red: #f87171;
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6; min-height: 100vh;
+  }
+  .container { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 48px; }
+  .header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+  .header p { color: var(--sub); margin-top: 8px; font-size: 1.05rem; }
+  .badge {
+    display: inline-block; background: var(--accent-glow); color: var(--accent);
+    padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; margin-top: 12px;
+  }
+
+  /* Progress */
+  .progress { display: flex; gap: 6px; margin-bottom: 32px; }
+  .progress-dot {
+    flex: 1; height: 3px; background: var(--border); border-radius: 3px;
+    transition: background 0.3s;
+  }
+  .progress-dot.active { background: var(--accent); }
+
+  /* Cards */
+  .question-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+    display: none;
+  }
+  .question-card.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+  .q-num { color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+  .q-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 20px; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 14px 18px; cursor: pointer;
+    transition: all 0.2s; font-size: 0.95rem;
+  }
+  .option:hover { border-color: var(--accent); background: var(--accent-glow); }
+  .option.selected { border-color: var(--accent); background: var(--accent-glow); }
+
+  /* Result */
+  .result { display: none; animation: fadeIn 0.5s ease; }
+  .result.visible { display: block; }
+  .result-header { text-align: center; margin-bottom: 24px; }
+  .result-header h2 { font-size: 1.3rem; }
+  .scores {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 24px;
+  }
+  .score-tag {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px; font-size: 0.85rem;
+  }
+  .score-tag span { color: var(--accent); font-weight: 600; }
+
+  .prompt-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem;
+    line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+    max-height: 500px; overflow-y: auto; margin-bottom: 20px;
+  }
+
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    padding: 12px 24px; border-radius: 10px; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #fff; padding: 12px 28px;
+    border-radius: 10px; font-weight: 600; font-size: 0.9rem;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  .platform-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .platform-tab {
+    padding: 6px 16px; border-radius: 8px; font-size: 0.82rem; cursor: pointer;
+    background: var(--bg); border: 1px solid var(--border); color: var(--sub);
+    transition: all 0.2s;
+  }
+  .platform-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .footer { text-align: center; margin-top: 48px; color: var(--sub); font-size: 0.82rem; }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 500px) {
+    .container { padding: 24px 16px; }
+    .header h1 { font-size: 1.6rem; }
+    .actions { flex-direction: column; }
+    .btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🧭 Warmstart</h1>
+    <p>5 道题，让 AI 第一次见你就认识你</p>
+    <div class="badge">支持 Hermes · Claude · Cursor · ChatGPT · 任意 AI</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- Questions injected by JS -->
+  <div id="questions"></div>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <div class="result-header">
+      <h2>✅ 你的专属 AI 画像</h2>
+      <p style="color:var(--sub);margin-top:4px">复制到任何 AI 的 system prompt 中即可生效</p>
+    </div>
+    <div class="scores" id="scores"></div>
+    <div class="prompt-box" id="promptBox"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="copyPrompt()">📋 复制画像</button>
+      <button class="btn btn-secondary" onclick="resetQuiz()">🔄 重新评估</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/diandian1001/warmstart" target="_blank">GitHub</a> · MIT · v0.2.0
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ============================================================
+// 量表数据
+// ============================================================
+const QUESTIONS = [
+  {
+    id: "conscientiousness", name: "做事风格",
+    q: "面对一个新任务，你通常怎么做？",
+    options: [
+      { text: "先列计划、分步骤，确保每个环节都有数", score: 1.0, label: "计划型" },
+      { text: "大概有个方向就开始，边做边调整", score: 0.3, label: "灵活型" },
+      { text: "看情况，重要的事会先计划", score: 0.6, label: "中间型" },
+    ]
+  },
+  {
+    id: "extraversion", name: "沟通偏好",
+    q: "和别人沟通时，你更倾向于？",
+    options: [
+      { text: "直来直去，说重点就行", score: 0.2, label: "直接型" },
+      { text: "先寒暄几句，关系融洽了再谈正事", score: 1.0, label: "关系型" },
+      { text: "看对象，熟人就直说，不熟就多铺垫", score: 0.6, label: "中间型" },
+    ]
+  },
+  {
+    id: "openness", name: "思维方式",
+    q: "遇到一个难题，你倾向于？",
+    options: [
+      { text: "尝试全新的方法，哪怕冒险", score: 1.0, label: "创新型" },
+      { text: "用之前验证过的成熟方法", score: 0.2, label: "经验型" },
+      { text: "看问题的性质，新问题用新方法", score: 0.6, label: "中间型" },
+    ]
+  },
+  {
+    id: "neuroticism", name: "情绪反应",
+    q: "当事情进展不顺时，你通常？",
+    options: [
+      { text: "容易焦虑，需要有人肯定方向是对的", score: 1.0, label: "敏感型" },
+      { text: "不太受影响，直接分析问题在哪", score: 0.2, label: "稳定型" },
+      { text: "会短暂焦虑但能很快调整", score: 0.6, label: "中间型" },
+    ]
+  },
+  {
+    id: "agreeableness", name: "决策方式",
+    q: "做重要决定时，你更依赖？",
+    options: [
+      { text: "自己的判断和分析", score: 0.2, label: "独立型" },
+      { text: "多听几个人的意见再定", score: 1.0, label: "合作型" },
+      { text: "自己判断为主，但会参考信任的人的意见", score: 0.6, label: "中间型" },
+    ]
+  },
+];
+
+const LABELS = {
+  conscientiousness: {
+    high: "做事有计划，喜欢结构和步骤。",
+    low: "做事灵活，边做边调整，不喜欢被固定流程束缚。",
+    mid: "做事有一定计划性，但也接受灵活调整。",
+  },
+  extraversion: {
+    high: "沟通中注重关系建立，喜欢先建立融洽感再谈正事。",
+    low: "沟通风格直接，喜欢简洁、直奔主题。",
+    mid: "沟通风格会根据对象调整，熟人直接，陌生人多铺垫。",
+  },
+  openness: {
+    high: "对新事物和新方法接受度高，愿意尝试有风险的方案。",
+    low: "偏好成熟、经过验证的方法，对风险保持谨慎。",
+    mid: "对创新持开放态度，但会根据具体情况判断是否采用。",
+  },
+  neuroticism: {
+    high: "对挫折比较敏感，需要得到肯定和方向确认。",
+    low: "情绪稳定，面对挫折时更关注如何解决问题本身。",
+    mid: "会有短暂的情绪波动，但通常能较快恢复理性。",
+  },
+  agreeableness: {
+    high: "习惯综合多方意见后再做决定，重视他人的看法。",
+    low: "决策时更依赖自己的判断，较少参考他人意见。",
+    mid: "有自己的判断，也会参考信任之人的意见。",
+  },
+};
+
+const INSTRUCTIONS = {
+  conscientiousness: {
+    high: "输出时先给框架和步骤，再给具体内容",
+    mid: "输出时先给结论，再给框架，最后给内容",
+    low: "输出时先给结论，再给推导过程",
+  },
+  extraversion: {
+    high: "适当加入回应性语言，在对话中建立连接感",
+    mid: "根据话题节奏自然切换简洁和关系型沟通",
+    low: "保持简洁，减少寒暄和客套话",
+  },
+  openness: {
+    high: "多提供新思路和替代方案，不局限于最常规的答案",
+    mid: "给出成熟方案但标注可选的新方向",
+    low: "优先给出已验证的成熟方案，减少不确定的选项",
+  },
+  neuroticism: {
+    high: "反馈时先肯定再给建议，避免直接否定用户的判断",
+    mid: "必要时先共情再分析，不需要过多情绪铺垫",
+    low: "直接给出分析和建议，不需要过多情绪缓冲",
+  },
+  agreeableness: {
+    high: "适时征求用户意见，保持双向沟通节奏",
+    mid: "给出判断后留一个征求意见的窗口",
+    low: "尊重用户的独立判断，不要频繁追问'你觉得呢'",
+  },
+};
+
+// ============================================================
+// 状态
+// ============================================================
+let answers = new Array(5).fill(null);
+let currentIdx = 0;
+
+// ============================================================
+// 渲染
+// ============================================================
+function init() {
+  // Progress dots
+  const progressDiv = document.getElementById("progress");
+  progressDiv.innerHTML = QUESTIONS.map((_, i) =>
+    `<div class="progress-dot" id="dot${i}"></div>`
+  ).join("");
+
+  // Question cards
+  const qDiv = document.getElementById("questions");
+  qDiv.innerHTML = QUESTIONS.map((q, i) => `
+    <div class="question-card" id="card${i}">
+      <div class="q-num">问题 ${i+1} / 5</div>
+      <div class="q-title">${q.q}</div>
+      <div class="options">${q.options.map((opt, j) => `
+        <div class="option" id="opt${i}_${j}" onclick="select(${i}, ${j})">
+          ${opt.text}
+        </div>
+      `).join("")}</div>
+    </div>
+  `).join("");
+
+  updateProgress();
+  showCard(0);
+}
+
+function select(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+
+  // Update UI
+  QUESTIONS[qIdx].options.forEach((_, j) => {
+    document.getElementById(`opt${qIdx}_${j}`).classList.remove("selected");
+  });
+  document.getElementById(`opt${qIdx}_${j}`).classList.add("selected");
+
+  document.getElementById(`dot${qIdx}`).classList.add("active");
+
+  if (qIdx < 4) {
+    setTimeout(() => showCard(qIdx + 1), 250);
+  } else {
+    setTimeout(() => showResult(), 400);
+  }
+}
+
+function showCard(idx) {
+  currentIdx = idx;
+  document.querySelectorAll(".question-card").forEach(c => c.classList.remove("visible"));
+  const card = document.getElementById(`card${idx}`);
+  if (card) {
+    card.classList.add("visible");
+    // Restore selection if already answered
+    if (answers[idx] !== null) {
+      document.getElementById(`opt${idx}_${answers[idx]}`).classList.add("selected");
+    }
+  }
+}
+
+function updateProgress() {
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    if (answers[i] !== null) dot.classList.add("active");
+    else dot.classList.remove("active");
+  }
+}
+
+// ============================================================
+// 画像生成
+// ============================================================
+
+function buildProfile() {
+  let scores = {};
+  QUESTIONS.forEach((q, i) => {
+    scores[q.id] = q.options[answers[i]].score;
+  });
+
+  // describe
+  let desc = [];
+  for (const dim of ["conscientiousness","extraversion","openness","neuroticism","agreeableness"]) {
+    const v = scores[dim];
+    if (v >= 0.7) desc.push(LABELS[dim].high);
+    else if (v <= 0.3) desc.push(LABELS[dim].low);
+    else desc.push(LABELS[dim].mid);
+  }
+
+  // instructions
+  let inst = [];
+  for (const dim of ["conscientiousness","extraversion","openness","neuroticism","agreeableness"]) {
+    const v = scores[dim];
+    if (v >= 0.7) inst.push(`- ${INSTRUCTIONS[dim].high}`);
+    else if (v <= 0.3) inst.push(`- ${INSTRUCTIONS[dim].low}`);
+    else inst.push(`- ${INSTRUCTIONS[dim].mid}`);
+  }
+
+  const prompt = `## 用户画像（冷启动先验）
+
+${desc.join("")}
+
+### 对话适配指令
+${inst.join("\n")}
+
+### 画像说明
+以上画像由快速评估生成，是初始先验，不是固定标签。
+在对话过程中持续观察用户行为，当实际表现与画像不一致时，以实际表现为准。
+此画像的置信度为中等，预计需要3-5轮对话修正到稳定状态。
+`;
+
+  return { scores, desc, inst, prompt };
+}
+
+function showResult() {
+  const { scores, prompt } = buildProfile();
+
+  // Score tags
+  const dimNames = { conscientiousness:"做事风格", extraversion:"沟通偏好",
+    openness:"思维方式", neuroticism:"情绪反应", agreeableness:"决策方式" };
+  document.getElementById("scores").innerHTML = Object.entries(scores).map(([k,v]) =>
+    `<div class="score-tag">${dimNames[k]} <span>${(v*100).toFixed(0)}%</span></div>`
+  ).join("");
+
+  document.getElementById("promptBox").textContent = prompt;
+
+  document.querySelectorAll(".question-card").forEach(c => c.classList.remove("visible"));
+  document.getElementById("result").classList.add("visible");
+  document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+}
+
+// ============================================================
+// 操作
+// ============================================================
+
+async function copyPrompt() {
+  const text = document.getElementById("promptBox").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("✅ 已复制！粘贴到你的 AI system prompt 中即可");
+  } catch {
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("✅ 已复制！");
+  }
+}
+
+function resetQuiz() {
+  answers = new Array(5).fill(null);
+  currentIdx = 0;
+  document.getElementById("result").classList.remove("visible");
+  updateProgress();
+  showCard(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ============================================================
+// 启动
+// ============================================================
+init();
+</script>
+</body>
+</html>
