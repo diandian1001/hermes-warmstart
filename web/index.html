@@ -16,33 +16,32 @@
   .progress-dot{flex:1;height:4px;background:var(--border);border-radius:4px;transition:background 0.3s}
   .progress-dot.done{background:var(--a1)}
   .progress-dot.done.s2{background:var(--a2)}
-  .progress-dot.done.s3{background:var(--a3)}
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px 24px;animation:fadeIn 0.3s ease}
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-bottom:14px}
   .badge.s1{background:rgba(124,92,252,0.12);color:var(--a1)}
   .badge.s2{background:rgba(245,158,11,0.12);color:var(--a2)}
-  .badge.s3{background:rgba(16,185,129,0.12);color:var(--a3)}
   .q-label{color:var(--sub);font-size:0.8rem;margin-bottom:12px}
   .q-title{font-size:1.1rem;font-weight:600;margin-bottom:20px;line-height:1.5}
   .privacy-note{color:var(--sub);font-size:0.78rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:20px;line-height:1.6}
   .privacy-note b{color:var(--a1)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .form-grid label{color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px}
+  .form-grid input,.form-grid select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem}
+  .form-grid input:focus,.form-grid select:focus{outline:none;border-color:var(--a1)}
+  .form-grid .wide{grid-column:1/-1}
   .options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
   .opt{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;font-size:0.9rem;line-height:1.5}
   .opt:hover{border-color:var(--a1)}
   .opt.picked{border-color:var(--a1);background:rgba(124,92,252,0.06)}
   .opt.picked::after{content:" ✓";float:right;font-weight:700;color:var(--a1)}
-  .opt.s2{border-color:var(--a2);background:rgba(245,158,11,0.06)}
-  .opt.s2::after{color:var(--a2)}
-  .opt.s3{border-color:var(--a3);background:rgba(16,185,129,0.06)}
-  .opt.s3::after{color:var(--a3)}
   .fill-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical;min-height:90px;margin-bottom:24px}
   .fill-input:focus{outline:none;border-color:var(--a3)}
   .fill-hint{color:var(--sub);font-size:0.78rem;background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:20px;line-height:1.6}
   .nav{display:flex;justify-content:space-between;align-items:center;gap:12px}
   .btn{padding:11px 24px;border-radius:10px;border:none;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
   .btn-next{background:var(--a1);color:#fff}.btn-next:hover{opacity:0.9}
-  .btn-next.s2{background:var(--a2)}.btn-next.s3{background:var(--a3)}
+  .btn-next.s2{background:var(--a2)}
   .btn-back{background:transparent;color:var(--sub);border:1px solid var(--border)}
   .btn-back:hover{border-color:var(--a1);color:var(--text)}
   .btn-skip{background:transparent;color:var(--sub);font-size:0.8rem;cursor:pointer}
@@ -64,7 +63,7 @@
 <div class="container">
   <div class="header">
     <h1>🧭 Warmstart</h1>
-    <p>选择场景 → 回答 4 题 → 任何 AI 第一次对话就认识你</p>
+    <p>选择场景 → 回答题 → 任何 AI 第一次对话就认识你</p>
   </div>
   <div class="progress" id="progress"></div>
   <div class="card" id="card"></div>
@@ -78,36 +77,58 @@
     </div>
   </div>
   <div class="footer">
-    <a href="https://github.com/diandian1001/warmstart" target="_blank">GitHub</a> · MIT · v0.4.0
+    <a href="https://github.com/diandian1001/warmstart" target="_blank">GitHub</a> · MIT · v0.4.1
   </div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
 // ============================================================
-// 数据定义
+// 出生信息（选填）
 // ============================================================
-
-// 公共出生信息（3题，可跳过）
-const BIRTH_Q = [
-  {id:"year",label:"出生年份",type:"number",placeholder:"如 1995",hint:"用于生成命盘快照，理解你当前的人生阶段。信息仅在本地处理，不会上传或存储。"},
+const BIRTH_FIELDS = [
+  {id:"year",label:"出生年份",type:"number",placeholder:"如 1995"},
   {id:"month",label:"出生月份",type:"select",options:["","1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]},
   {id:"day",label:"出生日",type:"number",placeholder:"1-31"},
   {id:"hour",label:"出生时辰",type:"select",options:["未知","子时(23-1点)","丑时(1-3)","寅时(3-5)","卯时(5-7)","辰时(7-9)","巳时(9-11)","午时(11-13)","未时(13-15)","申时(15-17)","酉时(17-19)","戌时(19-21)","亥时(21-23)"]},
-  {id:"gender",label:"性别",type:"select",options:["","男","女"],hint:"影响大限顺逆排法。"},
+  {id:"gender",label:"性别",type:"select",options:["","男","女"]},
+  {id:"mbti",label:"MBTI（选填）",type:"select",options:["","INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"],hint:"如果做过MBTI测试可以填，不知道可以跳过"},
 ];
 
-// 场景选择（1题）
+const MBTI_MAP = {
+  INTJ:{e:"内向型，需要独处思考的时间，不喜欢被打断",i:"直觉型，喜欢框架和可能性，不满足于表面信息",t:"思考型，直接分析，不需要情绪缓冲",j:"判断型，喜欢结构化输出，先框架后内容"},
+  INTP:{e:"内向型，需要独处思考的时间，不喜欢被打断",i:"直觉型，喜欢框架和可能性，不满足于表面信息",t:"思考型，直接分析，不需要情绪缓冲",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ENTJ:{e:"外向型，喜欢互动讨论，多给选择和追问",i:"直觉型，喜欢框架和可能性，不满足于表面信息",t:"思考型，直接分析，不需要情绪缓冲",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ENTP:{e:"外向型，喜欢互动讨论，多给选择和追问",i:"直觉型，喜欢框架和可能性，不满足于表面信息",t:"思考型，直接分析，不需要情绪缓冲",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  INFJ:{e:"内向型，需要独处思考的时间，不喜欢被打断",i:"直觉型，喜欢框架和可能性，不满足于表面信息",f:"感受型，先共情再给建议，避免直接否定",j:"判断型，喜欢结构化输出，先框架后内容"},
+  INFP:{e:"内向型，需要独处思考的时间，不喜欢被打断",i:"直觉型，喜欢框架和可能性，不满足于表面信息",f:"感受型，先共情再给建议，避免直接否定",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ENFJ:{e:"外向型，喜欢互动讨论，多给选择和追问",i:"直觉型，喜欢框架和可能性，不满足于表面信息",f:"感受型，先共情再给建议，避免直接否定",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ENFP:{e:"外向型，喜欢互动讨论，多给选择和追问",i:"直觉型，喜欢框架和可能性，不满足于表面信息",f:"感受型，先共情再给建议，避免直接否定",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ISTJ:{e:"内向型，需要独处思考的时间，不喜欢被打断",s:"实感型，喜欢具体方案和已验证的方法",t:"思考型，直接分析，不需要情绪缓冲",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ISFJ:{e:"内向型，需要独处思考的时间，不喜欢被打断",s:"实感型，喜欢具体方案和已验证的方法",f:"感受型，先共情再给建议，避免直接否定",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ESTJ:{e:"外向型，喜欢互动讨论，多给选择和追问",s:"实感型，喜欢具体方案和已验证的方法",t:"思考型，直接分析，不需要情绪缓冲",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ESFJ:{e:"外向型，喜欢互动讨论，多给选择和追问",s:"实感型，喜欢具体方案和已验证的方法",f:"感受型，先共情再给建议，避免直接否定",j:"判断型，喜欢结构化输出，先框架后内容"},
+  ISTP:{e:"内向型，需要独处思考的时间，不喜欢被打断",s:"实感型，喜欢具体方案和已验证的方法",t:"思考型，直接分析，不需要情绪缓冲",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ISFP:{e:"内向型，需要独处思考的时间，不喜欢被打断",s:"实感型，喜欢具体方案和已验证的方法",f:"感受型，先共情再给建议，避免直接否定",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ESTP:{e:"外向型，喜欢互动讨论，多给选择和追问",s:"实感型，喜欢具体方案和已验证的方法",t:"思考型，直接分析，不需要情绪缓冲",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+  ESFP:{e:"外向型，喜欢互动讨论，多给选择和追问",s:"实感型，喜欢具体方案和已验证的方法",f:"感受型，先共情再给建议，避免直接否定",p:"感知型，喜欢灵活输出，给方向不给死计划"},
+};
+
+// ============================================================
+// 场景选择
+// ============================================================
 const SCENARIOS = [
-  {id:"writing",  label:"📝 写作与表达", desc:"写邮件、报告、文案、改写润色、翻译", color:"s1"},
-  {id:"research", label:"🔍 研究与学习", desc:"查资料、学技能、整理笔记、做调研",   color:"s1"},
-  {id:"planning", label:"📊 规划与管理", desc:"待办事项、日程安排、项目管理、财务规划", color:"s1"},
-  {id:"coding",   label:"💻 技术与编程", desc:"写代码、调试、学编程、技术方案",     color:"s1"},
-  {id:"creative", label:"🎨 创意与设计", desc:"做图、做视频、写内容、做PPT、头脑风暴", color:"s1"},
-  {id:"daily",    label:"💬 日常与陪伴", desc:"闲聊、问答、健康咨询、生活建议",      color:"s1"},
-  {id:"custom",   label:"⚙️ 自定义",    desc:"我的需求比较特殊，自己描述",         color:"s1"},
+  {id:"writing",  label:"📝 写作与表达", desc:"写邮件、报告、文案、改写润色、翻译"},
+  {id:"research", label:"🔍 研究与学习", desc:"查资料、学技能、整理笔记、做调研"},
+  {id:"planning", label:"📊 规划与管理", desc:"待办事项、日程安排、项目管理、财务规划"},
+  {id:"coding",   label:"💻 技术与编程", desc:"写代码、调试、学编程、技术方案"},
+  {id:"creative", label:"🎨 创意与设计", desc:"做图、做视频、写内容、做PPT、头脑风暴"},
+  {id:"daily",    label:"💬 日常与陪伴", desc:"闲聊、问答、健康咨询、生活建议"},
+  {id:"custom",   label:"⚙️ 自定义",    desc:"我的需求比较特殊，自己描述"},
 ];
 
-// 按场景的维度问题（每个场景4题）
+// ============================================================
+// 场景维度问题
+// ============================================================
 const SCENE_Q = {
   writing: [
     {badge:"写作风格",q:"你的写作风格更接近哪种？",opts:[
@@ -280,7 +301,7 @@ const SCENE_Q = {
 // ============================================================
 // 状态
 // ============================================================
-let step = 0;  // 0=birth, 1=scenario, 2-5=scene_q, 6=done
+let step = 0;
 let sceneId = null;
 let birth = {};
 let sceneAnswers = [];
@@ -289,16 +310,13 @@ let sceneAnswers = [];
 // 渲染
 // ============================================================
 function render() {
-  // Progress: 5步（出生3合1 + 场景1 + 维度4）
-  const totalSteps = 2 + 4;
   let dots = '';
-  for(let i=0;i<totalSteps;i++){
+  for(let i=0;i<6;i++){
     const cls = i<step ? 'done' : '';
     const s2 = (i>=1) ? ' s2' : '';
     dots += `<div class="progress-dot${cls}${s2}"></div>`;
   }
   document.getElementById('progress').innerHTML = dots;
-
   if(step===0) renderBirth();
   else if(step===1) renderScenario();
   else if(step>=2 && step<=5) renderSceneQ(step-2);
@@ -306,29 +324,30 @@ function render() {
 }
 
 function renderBirth(){
-  const q = BIRTH_Q;
-  const yearVal = birth.year || '';
-  const monthVal = birth.month || '';
-  const dayVal = birth.day || '';
-  const hourVal = birth.hour || '';
-  const genderVal = birth.gender || '';
+  const fv = (id) => birth[id] || '';
+  const monthOpts = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const hourOpts = BIRTH_FIELDS.find(f=>f.id==='hour').options;
+  const mbtiOpts = BIRTH_FIELDS.find(f=>f.id==='mbti').options;
+  const genderOpts = BIRTH_FIELDS.find(f=>f.id==='gender').options;
   document.getElementById('card').innerHTML = `
     <div class="badge s1">出生信息（选填）</div>
     <div class="q-label">第 1 步 · 可直接跳过</div>
     <div class="privacy-note">
-      📌 <b>填写原因：</b>出生信息用于生成你的命盘快照，帮助AI理解你当前所处的人生阶段和性格基调。<br>
+      📌 <b>填写原因：</b>出生信息用于生成命盘快照，帮助AI理解你当前的人生阶段。MBTI帮助AI更快适应你的思维和沟通偏好。<br>
       🔒 <b>隐私说明：</b>信息仅在本地处理，不会上传或存储到任何服务器。跳过后画像仍会通过场景维度问题生成。
     </div>
-    <div class="options" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label style="color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px">出生年份</label><input type="number" id="bYear" placeholder="如 1995" value="${yearVal}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birth.year=this.value"></div>
-      <div><label style="color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px">出生月份</label><select id="bMonth" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birth.month=this.value"><option value="">选择</option>${['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'].map((m,i)=>`<option value="${i+1}"${birth.month==i+1?' selected':''}>${m}</option>`).join('')}</select></div>
-      <div><label style="color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px">出生日</label><input type="number" id="bDay" placeholder="1-31" min="1" max="31" value="${dayVal}" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" oninput="birth.day=this.value"></div>
-      <div><label style="color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px">出生时辰</label><select id="bHour" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birth.hour=this.value">${BIRTH_Q[3].options.map((h,i)=>`<option value="${i}"${birth.hour==i?' selected':''}>${h}</option>`).join('')}</select></div>
+    <div class="form-grid">
+      <div><label>出生年份</label><input type="number" placeholder="如 1995" value="${fv('year')}" oninput="birth.year=this.value"></div>
+      <div><label>出生月份</label><select onchange="birth.month=this.value"><option value="">选择</option>${monthOpts.slice(1).map((m,i)=>`<option value="${i+1}"${birth.month==i+1?' selected':''}>${m}</option>`).join('')}</select></div>
+      <div><label>出生日</label><input type="number" placeholder="1-31" min="1" max="31" value="${fv('day')}" oninput="birth.day=this.value"></div>
+      <div><label>出生时辰</label><select onchange="birth.hour=this.value">${hourOpts.map((h,i)=>`<option value="${i}"${birth.hour==i?' selected':''}>${h}</option>`).join('')}</select></div>
+      <div><label>性别</label><select onchange="birth.gender=this.value"><option value="">不填</option>${genderOpts.slice(1).map(g=>`<option value="${g}"${birth.gender===g?' selected':''}>${g}</option>`).join('')}</select></div>
+      <div><label>MBTI（选填）</label><select onchange="birth.mbti=this.value"><option value="">不知道 / 跳过</option>${mbtiOpts.slice(1).map(m=>`<option value="${m}"${birth.mbti===m?' selected':''}>${m}</option>`).join('')}</select></div>
     </div>
-    <div style="margin-bottom:8px"><label style="color:var(--sub);font-size:0.76rem;display:block;margin-bottom:4px">性别（影响大限顺逆排法）</label><select id="bGender" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.9rem" onchange="birth.gender=this.value"><option value="">不填</option><option value="男"${birth.gender==='男'?' selected':''}>男</option><option value="女"${birth.gender==='女'?' selected':''}>女</option></select></div>
+    <div style="color:var(--sub);font-size:0.78rem;margin-bottom:20px;padding:8px 12px;background:var(--bg);border-radius:8px">💡 不知道MBTI可以跳过。如果做过测试，填入4个字母（如 INTJ），AI会据此调整沟通风格。</div>
     <div class="nav">
       <span></span>
-      <span class="btn-skip" onclick="step=1;render()">跳过出生信息 →</span>
+      <span class="btn-skip" onclick="step=1;render()">跳过 →</span>
       <button class="btn btn-next" onclick="step=1;render()">下一步 →</button>
     </div>
   `;
@@ -344,8 +363,7 @@ function renderScenario(){
     ).join('')}</div>
     <div class="nav">
       <button class="btn btn-back" onclick="step=0;render()">← 出生信息</button>
-      <span></span>
-      <span></span>
+      <span></span><span></span>
     </div>
   `;
 }
@@ -364,7 +382,7 @@ function renderSceneQ(idx){
   const isFill = q.type==='fill';
   document.getElementById('card').innerHTML = `
     <div class="badge s2">${q.badge}</div>
-    <div class="q-label">第 ${idx+3} 步 · 第 ${idx+1}/${qs.length} 题（点击选项自动跳转）</div>
+    <div class="q-label">第 ${idx+3} 步 · 第 ${idx+1}/${qs.length} 题${isFill?'':'（点击选项自动跳转）'}</div>
     <div class="q-title">${q.q}</div>
     ${isFill ? `
       <textarea class="fill-input" id="fillInput" placeholder="${q.placeholder||''}" oninput="sceneAnswers[${idx}]=this.value">${sceneAnswers[idx]||''}</textarea>
@@ -383,15 +401,8 @@ function renderSceneQ(idx){
   if(isFill) document.getElementById('fillInput')?.focus();
 }
 
-function nextSceneQ(){
-  step++;
-  render();
-}
-function prevSceneQ(idx){
-  if(step>2) step--;
-  else {step=1;sceneId=null}
-  render();
-}
+function nextSceneQ(){ step++; render(); }
+function prevSceneQ(idx){ if(step>2) step--; else {step=1;sceneId=null} render(); }
 
 // ============================================================
 // 生成画像
@@ -401,7 +412,6 @@ function buildPrompt(){
   const scene = SCENARIOS.find(s=>s.id===sceneId);
   const sceneLabel = scene?scene.label:'未选择';
 
-  // 收集维度答案
   let dims = [];
   qs.forEach((q,i)=>{
     const a = sceneAnswers[i];
@@ -412,13 +422,20 @@ function buildPrompt(){
 
   // 出生信息
   let birthLine = [];
-  if(birth.year) birthLine.push(`${birth.year}年`);
-  if(birth.month) birthLine.push(`${birth.month}月`);
-  if(birth.day) birthLine.push(`${birth.day}日`);
-  if(birth.hour && birth.hour!=='0') birthLine.push(BIRTH_Q[3].options[parseInt(birth.hour)]);
-  if(birth.gender) birthLine.push(`· ${birth.gender}`);
+  if(birth.year) birthLine.push(birth.year+'年');
+  if(birth.month) birthLine.push(birth.month+'月');
+  if(birth.day) birthLine.push(birth.day+'日');
+  if(birth.hour && birth.hour!=='0') birthLine.push(BIRTH_FIELDS.find(f=>f.id==='hour').options[parseInt(birth.hour)]);
+  if(birth.gender) birthLine.push('· '+birth.gender);
   const birthStr = birthLine.length?birthLine.join(''):'未填写';
   const hasBirth = birth.year && birth.month && birth.day;
+
+  // MBTI映射
+  let mbtiBlock = '';
+  if(birth.mbti && MBTI_MAP[birth.mbti]){
+    const m = MBTI_MAP[birth.mbti];
+    mbtiBlock = `## MBTI 类型偏好\n类型：${birth.mbti}\n${m.e}\n${m.i||m.s}\n${m.t||m.f}\n${m.j||m.p}\n`;
+  }
 
   // 组装
   let prompt = `# AI 画像 · ${sceneLabel}
@@ -428,16 +445,15 @@ function buildPrompt(){
 - 使用场景：${sceneLabel}
 
 `;
+  if(mbtiBlock) prompt += mbtiBlock + '\n';
 
-  // 维度
   dims.forEach(d=>{
     prompt += `## ${d.badge}\n${d.val}\n\n`;
   });
 
   prompt += `---
-> 本画像由 Warmstart v0.4.0 生成，复制到任何 AI 的 system prompt 中即可生效。
+> 本画像由 Warmstart v0.4.1 生成，复制到任何 AI 的 system prompt 中即可生效。
 `;
-
   return prompt;
 }
 
@@ -462,7 +478,6 @@ function resetAll(){
   render();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-
 render();
 </script>
 </body>
