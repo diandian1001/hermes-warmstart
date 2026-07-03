@@ -38,7 +38,7 @@
 
 ## 怎么用
 
-1. 打开 https://diandian1001.github.io/hermes-warmstart/
+1. 打开 https://diandian1001.github.io/ai-warmstart/
 2. 选一个你最常用的场景（写作/编程/研究/日常...），回答 12 道题（约 3 分钟）
 3. 复制生成的文本 → 粘贴到你用的 AI 工具里
 
