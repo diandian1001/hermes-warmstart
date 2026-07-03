@@ -49,6 +49,7 @@ function buildPrompt(){
           '土五局': '土局：稳定型，善于积累和沉淀',
           '火六局': '火局：行动型，善于推动和变革',
         };
+        // 注意：以下星曜类型为 Warmstart 项目自定义简化命名，非传统紫微斗数标准术语
         const starExplain = {
           '紫微': '帝星，统御力强，需要辅弼配合',
           '天机': '智星，善于谋略和变化',
@@ -66,6 +67,11 @@ function buildPrompt(){
           '破军': '变星，善于突破和创新',
         };
 
+        const mingPalace = chart.palaces['命宫'];
+        const mingStarInfo = mingPalace && mingPalace.main_star
+          ? mingPalace.main_star.split('/').map(s => starExplain[s] || s).join(' + ')
+          : '';
+
         ziweiBlock = `## 命盘快照
 
 > 以下内容基于紫微斗数生成，帮你理解当前的人生阶段和性格基调。
@@ -75,9 +81,9 @@ function buildPrompt(){
 - 命宫：${chart.ming_gong}宫 — ${mingExplain[chart.ming_gong] || ''}
 - 身宫：${chart.shen_gong}宫 — ${mingExplain[chart.shen_gong] || ''}
 - 五行局：${chart.wuxing_ju} — ${juExplain[chart.wuxing_ju] || ''}
-- 当前大限：${chart.current_da_xian ? chart.current_da_xian.age_range + ' · ' + chart.current_da_xian.gong + '宫' : '未计算'}
+- 当前大运（10年大限）：${chart.current_da_xian ? chart.current_da_xian.age_range + ' · ' + chart.current_da_xian.gong + '宫' : '未计算'}
 
-**命宫解读：** 你的命宫在${chart.ming_gong}宫，说明你的核心性格特点是${mingExplain[chart.ming_gong] || '需要结合具体星曜分析'}。当前大限在${chart.current_da_xian ? chart.current_da_xian.gong + '宫' : '未知'}，意味着这个阶段你的人生课题与${chart.current_da_xian ? chart.current_da_xian.gong + '宫相关' : '需要更多信息判断'}。
+**命宫解读：** 命宫在${chart.ming_gong}宫（${mingExplain[chart.ming_gong] || ''}），主星为${mingPalace?.main_star || '无'}（${mingStarInfo}）。命宫地支提供五行方位参考，性格以主星分布为准。当前大运在${chart.current_da_xian ? chart.current_da_xian.gong + '宫' : '未知'}，这个10年阶段你的成长课题与${chart.current_da_xian ? chart.current_da_xian.gong + '宫相关' : '需要更多信息判断'}。
 
 **主星分布：**
 `;
@@ -165,11 +171,8 @@ function buildPrompt(){
 
 **维度解读：**
 `;
-    for(const trait of mbtiTraits) {
-      const key = trait.charAt(0);
-      if(mbtiExplain[key]) {
-        prompt += `- ${mbtiExplain[key]}\n`;
-      }
+    for(let i = 0; i < mbtiTraits.length; i++) {
+      prompt += `- ${mbtiTraits[i]}\n`;
     }
     prompt += `
 > ⚠️ 以上为性格背景参考，优先级低于场景维度的回答。
