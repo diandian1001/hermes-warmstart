@@ -1,5 +1,9 @@
 # Warmstart
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-7c5cfc.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Try_It-f59e0b.svg)](https://diandian1001.github.io/ai-warmstart/)
+[![Stars](https://img.shields.io/github/stars/diandian1001/ai-warmstart?style=social)](https://github.com/diandian1001/ai-warmstart)
+
 生成你的 AI 用户记忆——把你的沟通偏好、使用习惯、工作风格等信息结构化，首次使用AI时给它，AI就知道怎么跟你说话。
 
 ---
