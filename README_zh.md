@@ -8,6 +8,8 @@
 
 ---
 
+> 当前界面仅支持中文。英文版本计划后续补充，不包含在 v0.7.2 中。
+
 ## 快速开始
 
 1. 打开 **[diandian1001.github.io/ai-warmstart](https://diandian1001.github.io/ai-warmstart/)**
@@ -110,7 +112,7 @@ Warmstart 生成的是纯文本，不绑定任何平台：
 
 ## 隐私
 
-**所有数据完全在浏览器本地处理。** 不会上传到任何服务器。不使用 Cookie、第三方 API 或分析工具。localStorage 仅用于保存中文/英文界面语言偏好。问卷答案、出生信息、MBTI、生成结果均只保存在当前页面内存中，关闭页面后数据消失。
+**所有数据完全在浏览器本地处理。** 不会上传到任何服务器。当前版本仅提供中文界面，不使用 localStorage、sessionStorage、Cookie、第三方 API 或分析工具。问卷答案、出生信息、MBTI 和生成结果仅保存在当前页面内存中，刷新或关闭页面后即消失。
 
 详见 [PRIVACY.md](PRIVACY.md)。
 

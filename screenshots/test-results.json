@@ -14,23 +14,21 @@
       "passed": true
     },
     {
-      "name": "T4: Exp-fill-birth",
+      "name": "T4: Exp-complete-birth",
       "passed": true,
-      "details": "disclaimer:true"
+      "details": "chars:1695 missing:none errors:0"
     },
     {
-      "name": "T6: Copy",
+      "name": "T5: Copy",
       "passed": true,
-      "details": "toast:true"
+      "details": "promptChars:233 clipboardChars:259 matched:true"
     },
     {
-      "name": "T7: Console errors",
-      "passed": false,
-      "details": "1 errors: T6: Failed to execute 'writeText' on 'Clipboard': Write permission denied."
+      "name": "T6: Console errors",
+      "passed": true,
+      "details": "0 errors"
     }
   ],
-  "errors": [
-    "T6: Failed to execute 'writeText' on 'Clipboard': Write permission denied."
-  ],
-  "passed": false
+  "errors": [],
+  "passed": true
 }

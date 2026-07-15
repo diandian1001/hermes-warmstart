@@ -38,7 +38,9 @@ async function answerAllQuestions(page, universalCount, sceneCount) {
 async function run() {
   const browser = await chromium.launch({ headless: true });
 
-  // Test 1: Professional mode - writing
+  // ========================
+  // Test 1: Professional Mode writing
+  // ========================
   console.log('\n=== Test 1: Professional Mode writing ===');
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
@@ -46,36 +48,32 @@ async function run() {
     page.on('console', msg => { if (msg.type() === 'error') errors.push('T1 console: ' + msg.text()); });
 
     await page.goto(HTML_PATH, { waitUntil: 'networkidle' });
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't1-initial.png') });
 
-    // Select Professional Mode
     const modeCards = await page.$$('.mode-card');
-    if (modeCards.length >= 1) await modeCards[0].click();
+    await modeCards[0].click();
     await page.waitForTimeout(500);
 
-    // Select writing
     const scenarios = await page.$$('.opt');
-    if (scenarios.length >= 1) await scenarios[0].click();
+    await scenarios[0].click();
     await page.waitForTimeout(500);
 
-    // Answer all
     await answerAllQuestions(page, 5, 4);
 
-    const promptBox = await page.$('#promptBox');
-    const promptText = promptBox ? await promptBox.textContent() : '';
-
-    const badTerms = ['出生信息', 'MBTI', '紫微', '命盘', 'Astrology'];
+    const promptText = (await page.locator('#promptBox').textContent()) || '';
+    const badTerms = ['出生', 'MBTI', '紫微', '命盘', 'Astrology'];
     const foundBad = badTerms.filter(t => promptText.includes(t));
-    const resultVisible = await page.$('.result.visible');
+    const resultVisible = await page.locator('.result.visible').count();
 
-    const passed = !!resultVisible && promptText.length > 50 && foundBad.length === 0;
+    const passed = resultVisible === 1 && promptText.length > 50 && foundBad.length === 0;
     testResults.push({ name: 'T1: Pro-writing', passed, details: `chars:${promptText.length} bad:${foundBad.join(',')||'none'}` });
     console.log('  ' + (passed ? 'PASS' : 'FAIL') + ': ' + testResults[testResults.length-1].details);
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't1-pro-writing.png'), fullPage: true });
     await page.close();
   }
 
-  // Test 2: Professional mode - custom
+  // ========================
+  // Test 2: Professional Mode custom
+  // ========================
   console.log('\n=== Test 2: Professional Mode custom ===');
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
@@ -87,28 +85,30 @@ async function run() {
     await page.waitForTimeout(500);
 
     const scenarios = await page.$$('.opt');
-    await scenarios[scenarios.length - 1].click(); // custom is last
+    await scenarios[scenarios.length - 1].click();
     await page.waitForTimeout(500);
 
-    await answerAllQuestions(page, 5, 3); // custom has 3 questions
+    await answerAllQuestions(page, 5, 3);
 
-    const resultVisible = await page.$('.result.visible');
-    const passed = !!resultVisible;
+    const resultVisible = await page.locator('.result.visible').count();
+    const passed = resultVisible === 1;
     testResults.push({ name: 'T2: Pro-custom', passed });
     console.log('  ' + (passed ? 'PASS' : 'FAIL'));
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't2-pro-custom.png'), fullPage: true });
     await page.close();
   }
 
+  // ========================
   // Test 3: Experimental skip birth
-  console.log('\n=== Test 3: Experimental skip birth ===');
+  // ========================
+  console.log('\n=== Test 3: Experimental Mode skip birth ===');
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     page.on('pageerror', err => errors.push('T3: ' + err.message));
 
     await page.goto(HTML_PATH, { waitUntil: 'networkidle' });
     const modeCards = await page.$$('.mode-card');
-    await modeCards[1].click(); // Experimental
+    await modeCards[1].click();
     await page.waitForTimeout(500);
 
     const skipBtn = await page.$('.btn-skip');
@@ -121,99 +121,145 @@ async function run() {
 
     await answerAllQuestions(page, 5, 4);
 
-    const resultVisible = await page.$('.result.visible');
-    const passed = !!resultVisible;
+    const resultVisible = await page.locator('.result.visible').count();
+    const passed = resultVisible === 1;
     testResults.push({ name: 'T3: Exp-skip-birth', passed });
     console.log('  ' + (passed ? 'PASS' : 'FAIL'));
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't3-exp-skip-birth.png'), fullPage: true });
     await page.close();
   }
 
-  // Test 4: Experimental fill birth
-  console.log('\n=== Test 4: Experimental fill birth ===');
+  // ========================
+  // Test 4: Experimental Mode complete birth info
+  // ========================
+  console.log('\n=== Test 4: Experimental Mode complete birth info ===');
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    page.on('pageerror', err => errors.push('T4: ' + err.message));
+    const localErrors = [];
+    page.on('pageerror', err => {
+      localErrors.push('pageerror: ' + err.message);
+      errors.push('T4: ' + err.message);
+    });
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        localErrors.push('console: ' + msg.text());
+        errors.push('T4 console: ' + msg.text());
+      }
+    });
 
     await page.goto(HTML_PATH, { waitUntil: 'networkidle' });
+
     const modeCards = await page.$$('.mode-card');
+    if (modeCards.length < 2) throw new Error('Experimental mode card not found');
     await modeCards[1].click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
-    // Fill birth
-    const inputs = await page.$$('input[type="number"]');
-    if (inputs.length >= 2) {
-      await inputs[0].fill('1995');
-      await inputs[1].fill('15');
-    }
+    const numberInputs = await page.$$('input[type="number"]');
+    if (numberInputs.length < 2) throw new Error('Birth number inputs not found');
+    await numberInputs[0].fill('1995');
+    await numberInputs[1].fill('15');
+
     const selects = await page.$$('select');
-    if (selects.length >= 1) {
-      await selects[0].selectOption('6');
-    }
+    if (selects.length < 4) throw new Error('Birth select inputs not found');
+    await selects[0].selectOption('6');
+    await selects[1].selectOption('6');
+    await selects[2].selectOption({ label: '女' });
+    await selects[3].selectOption('ISTJ');
 
-    const nextBtn = await page.$('.btn-next');
-    if (nextBtn) await nextBtn.click();
-    await page.waitForTimeout(500);
+    await page.locator('.btn-next').click();
+    await page.waitForTimeout(200);
 
     const scenarios = await page.$$('.opt');
+    if (scenarios.length < 1) throw new Error('Scenario options not found');
     await scenarios[0].click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     await answerAllQuestions(page, 5, 4);
 
-    const promptBox = await page.$('#promptBox');
-    const promptText = promptBox ? await promptBox.textContent() : '';
-    const hasDisclaimer = promptText.includes('仅供娱乐') || promptText.includes('Entertainment');
-    const resultVisible = await page.$('.result.visible');
+    const promptText = (await page.locator('#promptBox').textContent()) || '';
+    const resultVisible = await page.locator('.result.visible').count();
 
-    const passed = !!resultVisible && promptText.length > 100 && hasDisclaimer;
-    testResults.push({ name: 'T4: Exp-fill-birth', passed, details: 'disclaimer:' + hasDisclaimer });
+    const requiredTerms = ['仅供娱乐', '出生信息', '命盘快照', '农历', '命宫', 'MBTI', 'ISTJ'];
+    const missingTerms = requiredTerms.filter(term => !promptText.includes(term));
+
+    const passed = resultVisible === 1 && promptText.length > 300 && missingTerms.length === 0 && localErrors.length === 0;
+
+    testResults.push({
+      name: 'T4: Exp-complete-birth',
+      passed,
+      details: `chars:${promptText.length} missing:${missingTerms.join(',')||'none'} errors:${localErrors.length}`,
+    });
     console.log('  ' + (passed ? 'PASS' : 'FAIL') + ': ' + testResults[testResults.length-1].details);
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't4-exp-fill-birth.png'), fullPage: true });
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't4-exp-complete-birth.png'), fullPage: true });
     await page.close();
   }
 
-  // Test 6: Copy button
-  console.log('\n=== Test 6: Copy button ===');
+  // ========================
+  // Test 5: Copy button
+  // ========================
+  console.log('\n=== Test 5: Copy button ===');
   {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    page.on('pageerror', err => errors.push('T6: ' + err.message));
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 900 },
+      permissions: ['clipboard-read', 'clipboard-write'],
+    });
+    const page = await context.newPage();
+
+    page.on('pageerror', err => { errors.push('T5: ' + err.message); });
+    page.on('console', msg => { if (msg.type() === 'error') errors.push('T5 console: ' + msg.text()); });
 
     await page.goto(HTML_PATH, { waitUntil: 'networkidle' });
+
     const modeCards = await page.$$('.mode-card');
+    if (modeCards.length < 1) throw new Error('Professional mode card not found');
     await modeCards[0].click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
+
     const scenarios = await page.$$('.opt');
+    if (scenarios.length < 1) throw new Error('Scenario options not found');
     await scenarios[0].click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
+
     await answerAllQuestions(page, 5, 4);
 
-    const copyBtn = await page.$('.btn-copy');
-    if (copyBtn) {
-      await copyBtn.click();
-      await page.waitForTimeout(500);
-    }
-    const toast = await page.$('.toast.show');
-    const passed = !!toast;
-    testResults.push({ name: 'T6: Copy', passed, details: 'toast:' + !!toast });
+    const promptText = (await page.locator('#promptBox').textContent()) || '';
+    await page.locator('.btn-copy').click();
+    await page.waitForTimeout(300);
+
+    const clipboardText = await page.evaluate(async () => {
+      return await navigator.clipboard.readText();
+    });
+    const toastText = (await page.locator('#toast').textContent()) || '';
+
+    const clipboardNormalized = clipboardText.replace(/\r\n/g, '\n');
+    const promptNormalized = promptText.replace(/\r\n/g, '\n');
+
+    const passed = promptText.length > 0 && clipboardNormalized === promptNormalized && toastText.includes('已复制');
+
+    testResults.push({
+      name: 'T5: Copy',
+      passed,
+      details: `promptChars:${promptText.length} clipboardChars:${clipboardText.length} matched:${clipboardNormalized === promptNormalized}`,
+    });
     console.log('  ' + (passed ? 'PASS' : 'FAIL') + ': ' + testResults[testResults.length-1].details);
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't6-copy.png'), fullPage: true });
-    await page.close();
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 't5-copy.png'), fullPage: true });
+    await context.close();
   }
 
-  // Test 7: Error count
+  // ========================
+  // Test 6: Console errors
+  // ========================
   const realErrors = errors.filter(e => !e.includes('libpng') && !e.includes('iCCP'));
-  const t7passed = realErrors.length === 0;
-  testResults.push({ name: 'T7: Console errors', passed: t7passed, details: realErrors.length + ' errors: ' + realErrors.join('; ') });
-  console.log('\n=== Test 7: Console errors ===');
-  console.log('  ' + (t7passed ? 'PASS' : 'FAIL') + ': ' + realErrors.length + ' errors');
+  const t6passed = realErrors.length === 0;
+  testResults.push({ name: 'T6: Console errors', passed: t6passed, details: realErrors.length + ' errors' + (realErrors.length ? ': ' + realErrors.join('; ') : '') });
+  console.log('\n=== Test 6: Console errors ===');
+  console.log('  ' + (t6passed ? 'PASS' : 'FAIL') + ': ' + realErrors.length + ' errors');
 
   await browser.close();
 
-  // Summary
   console.log('\n=== SUMMARY ===');
   const allPassed = testResults.every(t => t.passed);
-  testResults.forEach(t => console.log('  ' + (t.passed ? '✓' : '✗') + ' ' + t.name + (t.details ? ': ' + t.details : '')));
+  testResults.forEach(t => console.log('  ' + (t.passed ? '\u2713' : '\u2717') + ' ' + t.name + (t.details ? ': ' + t.details : '')));
   console.log('\nOverall: ' + (allPassed ? 'ALL PASSED' : 'SOME FAILED'));
   console.log('Console errors: ' + realErrors.length);
 

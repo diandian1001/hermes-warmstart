@@ -12,9 +12,7 @@
   .header{text-align:center;margin-bottom:10px;position:relative}
   .header h1{font-size:1.6rem;font-weight:700}
   .header p{color:var(--sub);font-size:0.9rem;margin-top:4px}
-  .lang-switch{position:absolute;top:0;right:0;display:flex;gap:4px}
-  .lang-switch button{padding:4px 10px;font-size:0.75rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--sub);cursor:pointer;transition:all 0.2s}
-  .lang-switch button.active{background:var(--a1);color:#fff;border-color:var(--a1)}
+
   .progress{display:flex;gap:4px;margin-bottom:24px}
   .progress-dot{flex:1;height:4px;background:var(--border);border-radius:4px;transition:background 0.3s}
   .progress-dot.done{background:var(--a1)}.progress-dot.done.s2{background:var(--a2)}.progress-dot.done.s3{background:var(--a3)}
@@ -58,7 +56,7 @@
   .toast.show{opacity:1}
   .footer{text-align:center;margin-top:32px;color:var(--sub);font-size:0.76rem}
   .footer a{color:var(--a1);text-decoration:none}
-  @media(max-width:500px){.container{padding:18px 12px}.card{padding:20px 16px}.actions{flex-direction:column}.btn{width:100%;text-align:center}.form-grid{grid-template-columns:1fr}.lang-switch{position:static;justify-content:center;margin-top:8px}}
+  @media(max-width:500px){.container{padding:18px 12px}.card{padding:20px 16px}.actions{flex-direction:column}.btn{width:100%;text-align:center}.form-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -86,12 +84,10 @@
 <script src="ziwei.js"></script>
 <script src="prompt.js"></script>
 <script>
-var mode = null, uiLang = 'zh';
-
-// ========== Translations ==========
+var mode = null;
 var uiLang = 'zh';
 
-// ========== Data (unchanged) ==========
+// ========== Data (
 const BIRTH_FIELDS = [
   {id:"year",labelKey:"birthYear",type:"number",placeholder:"如 1995"},
   {id:"month",labelKey:"birthMonth",type:"select",options:["","1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]},
@@ -108,13 +104,13 @@ const SCENARIOS = [
   {id:"coding",label:"💻 技术与编程"},{id:"creative",label:"🎨 创意与设计"},{id:"daily",label:"💬 日常与陪伴"},{id:"custom",label:"⚙️ 自定义"}
 ];
 var SCN = {
-  writing:{zh:'📝 写作与表达',en:'📝 Writing & Expression',dzh:'写邮件、报告、文案、改写润色、翻译',den:'Emails, reports, copywriting, editing, translation'},
-  research:{zh:'🔍 研究与学习',en:'🔍 Research & Learning',dzh:'查资料、学技能、整理笔记、做调研',den:'Research, skill-building, note-taking, investigation'},
-  planning:{zh:'📊 规划与管理',en:'📊 Planning & Management',dzh:'待办事项、日程安排、项目管理、财务规划',den:'Tasks, scheduling, project management, finance'},
-  coding:{zh:'💻 技术与编程',en:'💻 Tech & Programming',dzh:'写代码、调试、学编程、技术方案',den:'Coding, debugging, learning to code, technical solutions'},
-  creative:{zh:'🎨 创意与设计',en:'🎨 Creative & Design',dzh:'做图、做视频、写内容、做PPT、头脑风暴',den:'Images, video, content, presentations, brainstorming'},
-  daily:{zh:'💬 日常与陪伴',en:'💬 Daily & Companion',dzh:'闲聊、问答、健康咨询、生活建议',den:'Chat, Q&A, health advice, life suggestions'},
-  custom:{zh:'⚙️ 自定义',en:'⚙️ Custom',dzh:'我的需求比较特殊，自己描述',den:'My needs are specific — I\'ll describe them'}
+  writing:{zh:'📝 写作与表达',dzh:'写邮件、报告、文案、改写润色、翻译'},
+  research:{zh:'🔍 研究与学习',dzh:'查资料、学技能、整理笔记、做调研'},
+  planning:{zh:'📊 规划与管理',dzh:'待办事项、日程安排、项目管理、财务规划'},
+  coding:{zh:'💻 技术与编程',dzh:'写代码、调试、学编程、技术方案'},
+  creative:{zh:'🎨 创意与设计',dzh:'做图、做视频、写内容、做PPT、头脑风暴'},
+  daily:{zh:'💬 日常与陪伴',dzh:'闲聊、问答、健康咨询、生活建议'},
+  custom:{zh:'⚙️ 自定义',dzh:'我的需求比较特殊，自己描述'}
 };
 
 // Scene questions — labels only, full text in prompt.js (unchanged)
@@ -431,7 +427,7 @@ function renderUniversal(idx){
   var q=UNIVERSAL_Q[idx], offset=mode==='exp'?3:2;
   document.getElementById('card').innerHTML =
     '<div class="badge s2">'+q.badge+'</div>'+
-    '<div class="q-label">'+(uiLang==='zh'?'第':'Step ')+(offset+idx+1)+(uiLang==='zh'?' 步 · ':' · ')+'通用偏好'+' '+(idx+1)+'/5</div>'+
+    '<div class="q-label">'+'第'+(offset+idx+1)+' 步 · '+'通用偏好'+' '+(idx+1)+'/5</div>'+
     '<div class="q-title">'+q.q+'</div>'+
     '<div class="options">'+q.opts.map(function(o,i){
       return '<div class="opt'+(universalAnswers[idx]===i?' picked':'')+'" onclick="universalAnswers['+idx+']='+i+';step++;render()">'+o.t+'</div>';
@@ -445,7 +441,7 @@ function renderSceneQ(idx){
   var q=qs[idx], isFill=q.type==='fill', offset=mode==='exp'?8:7;
   document.getElementById('card').innerHTML =
     '<div class="badge s3">'+q.badge+'</div>'+
-    '<div class="q-label">'+(uiLang==='zh'?'第':'Step ')+(offset+idx+1)+(uiLang==='zh'?' 步 · ':' · ')+q.badge+' '+(idx+1)+'/'+qs.length+(isFill?'':' (click to auto-advance)')+'</div>'+
+    '<div class="q-label">'+'第'+(offset+idx+1)+' 步 · '+q.badge+' '+(idx+1)+'/'+qs.length+(isFill?'':' (click to auto-advance)')+'</div>'+
     '<div class="q-title">'+q.q+'</div>'+
     (isFill ? '<textarea class="fill-input" id="fillInput" placeholder="'+(q.placeholder||'')+'" oninput="sceneAnswers['+idx+']=this.value">'+(sceneAnswers[idx]||'')+'</textarea>'+(
       q.examples?'<div class="fill-hint">💡 Examples: '+q.examples.map(function(e){return '"'+e+'"';}).join(', ')+'</div>':'')
@@ -466,20 +462,64 @@ function showResult(){
   document.querySelectorAll('.progress-dot').forEach(function(el){el.classList.add('done')});
 }
 
-function copyPrompt(){
-  var txt=document.getElementById('promptBox').textContent;
-  try{navigator.clipboard.writeText(txt)}catch(e){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)}
-  showToast('✅ 已复制！粘贴到任何 AI 的 system prompt 中即可');
+async function copyPrompt() {
+  var txt = document.getElementById('promptBox').textContent;
+
+  if (!txt) {
+    showToast('❌ 暂无可复制内容');
+    return false;
+  }
+
+  // 优先使用现代 Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(txt);
+      showToast('✅ 已复制！粘贴到任何 AI 的 system prompt 中即可');
+      return true;
+    } catch (error) {
+      console.warn('Clipboard API 复制失败，尝试兼容方案：', error);
+    }
+  }
+
+  // 兼容旧浏览器或权限受限环境
+  var textarea = document.createElement('textarea');
+  textarea.value = txt;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  textarea.style.top = '0';
+
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  var copied = false;
+
+  try {
+    copied = document.execCommand('copy');
+  } catch (error) {
+    console.warn('兼容复制方案失败：', error);
+  } finally {
+    document.body.removeChild(textarea);
+  }
+
+  if (copied) {
+    showToast('✅ 已复制！粘贴到任何 AI 的 system prompt 中即可');
+    return true;
+  }
+
+  showToast('❌ 自动复制失败，请长按或全选文本手动复制');
+  return false;
 }
 
 function resetAll(){step=0;mode=null;sceneId=null;birth={};universalAnswers=[];sceneAnswers=[];document.getElementById('result').classList.remove('visible');render();}
 function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},2500)}
 
-// Restore saved language
-// Initialize: Chinese only
+// Initialize
 uiLang = 'zh';
 document.documentElement.lang = 'zh-CN';
 render();
+
 </script>
 </body>
 </html>

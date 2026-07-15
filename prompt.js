@@ -18,7 +18,7 @@ function buildPrompt(){
 
   // 命盘计算
   let ziweiBlock = '';
-  if(hasBirth) {
+  if (mode === 'exp' && hasBirth) {
     try {
       const chart = calculateZiwei(
         parseInt(birth.year),
@@ -120,7 +120,7 @@ function buildPrompt(){
 
   // MBTI映射
   let mbtiTraits = [];
-  if(birth.mbti && MBTI_MAP[birth.mbti]){
+  if (mode === 'exp' && birth.mbti && MBTI_MAP[birth.mbti]) {
     const m = MBTI_MAP[birth.mbti];
     mbtiTraits = [m.e, m.i||m.s, m.t||m.f, m.j||m.p];
   }
@@ -130,7 +130,7 @@ function buildPrompt(){
 
 `;
   if (mode === 'exp') {
-    prompt += `> 🎭 实验模式 · 星座内容仅供娱乐，不构成人格测量或决策依据。
+    prompt += `> 🎭 实验模式 · 紫微斗数与 MBTI 内容仅供娱乐和自我探索，不构成人格测量、心理评估、职业指导或任何决策依据。
 
 `;
   }
@@ -200,7 +200,7 @@ function buildPrompt(){
   }
 
   prompt += `---
-> 本画像由 Warmstart v0.7.1 生成，复制到任何 AI 的 system prompt 中即可生效。
+> 本画像由 Warmstart v0.7.2 生成，复制到任何 AI 的 system prompt 中即可生效。
 `;
   if (mode === 'exp') {
     prompt += `> 如果 AI 不理解命盘术语或 MBTI 类型，可以参考上方的解读说明。

@@ -8,6 +8,8 @@
 
 ---
 
+> Current interface language: Chinese only. English localization is planned but is not included in v0.7.2.
+
 ## Quick Start
 
 1. Open **[diandian1001.github.io/ai-warmstart](https://diandian1001.github.io/ai-warmstart/)**
@@ -98,7 +100,7 @@ See [docs/profile-dimensions.md](docs/profile-dimensions.md) for a detailed expl
 
 ## Privacy
 
-**All data is processed entirely in your browser.** Nothing is uploaded to any server. No cookies, no analytics, no third-party APIs. localStorage is used only to save your Chinese/English UI language preference. Questionnaire answers, birth information, MBTI type, and generated profiles are held only in page memory and disappear when you close the page.
+**All data is processed entirely in your browser.** Nothing is uploaded to any server. The current version provides a Chinese-only interface and does not use localStorage, sessionStorage, cookies, analytics, or third-party APIs. Questionnaire answers, birth information, MBTI type, and generated profiles are held only in page memory and disappear when the page is refreshed or closed.
 
 See [PRIVACY.md](PRIVACY.md) for full details.
 
