@@ -134,8 +134,16 @@ function buildPrompt(){
 
 `;
 
-  // 命盘快照（优先级最高）
-  if(ziweiBlock) prompt += ziweiBlock;
+  // 命盘快照（仅实验模式，加娱乐声明）
+  if(mode === 'exp' && ziweiBlock) {
+    ziweiBlock = '## 🎭 Astrology Snapshot (Entertainment Only)\n\n' +
+      '> ⚠️ The following Zi Wei Dou Shu content is provided **for entertainment and self-exploration only**. ' +
+      'It does not constitute personality measurement, psychological assessment, or decision-making guidance. ' +
+      'If the content below conflicts with your actual preferences described in other sections, ' +
+      'always prioritize your stated preferences over astrological interpretations.\n\n' +
+      ziweiBlock;
+    prompt += ziweiBlock;
+  }
 
   // 通用维度
   prompt += `## 通用偏好\n`;
@@ -149,8 +157,8 @@ function buildPrompt(){
     prompt += `## ${d.badge}\n${d.val}\n\n`;
   });
 
-  // MBTI补充（含解释）
-  if(mbtiTraits.length){
+  // MBTI补充（仅在实验模式）
+  if(mode === 'exp' && mbtiTraits.length){
     const mbtiExplain = {
       'I': '内向型 (Introversion)：从独处中获得能量，喜欢深度思考',
       'E': '外向型 (Extraversion)：从社交中获得能量，喜欢互动交流',
