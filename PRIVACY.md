@@ -18,7 +18,7 @@ The tool asks you questions about your AI usage preferences, and optionally:
 |----------|--------|
 | Is data uploaded to a server? | **No.** All processing happens in your browser's JavaScript engine. |
 | Is data stored after you close the page? | **No.** All data is held in temporary JavaScript variables. When you close or refresh the page, it is gone. |
-| Is `localStorage` used? | **No.** The page does not read from or write to `localStorage`, `sessionStorage`, or IndexedDB. |
+| Is `localStorage` used? | **Yes, for UI language preference only.** The page saves your language choice (Chinese/English) to `localStorage` so it persists across visits. **No questionnaire answers, birth information, or generated profiles are stored.** No `sessionStorage` or IndexedDB is used. |
 | Are cookies used? | **No.** |
 | Are third-party APIs called? | **No.** The Zi Wei Dou Shu calculation (`ziwei.js`) is a local JavaScript function. No external API is called. |
 | Is there any analytics or logging? | **No.** There is no Google Analytics, no tracking pixel, no error logging service. |

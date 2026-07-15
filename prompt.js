@@ -190,7 +190,7 @@ function buildPrompt(){
   }
 
   prompt += `---
-> 本画像由 Warmstart v0.6.2 生成，复制到任何 AI 的 system prompt 中即可生效。
+> 本画像由 Warmstart v0.7.1 生成，复制到任何 AI 的 system prompt 中即可生效。
 > 如果 AI 不理解命盘术语或 MBTI 类型，可以参考上方的解读说明。
 `;
   return prompt;
